@@ -1,0 +1,9 @@
+[theme]
+primaryColor="#F57C00"            # safety orange accent
+backgroundColor="#FFFFFF"
+secondaryBackgroundColor="#F4F6F8" # light steel gray
+textColor="#111111"
+font="sans serif"
+
+[server]
+headless = true
