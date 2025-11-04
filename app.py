@@ -189,4 +189,21 @@ def main():
     with tabs[3]: tab_settings()
 
 if __name__ == "__main__":
-    main()
+    main()# --- Added in Step 2 ---
+import utils.storage as storage
+import utils.assignments as assignments
+
+# Initialize data folder and submissions file
+storage.ensure_data_dir()
+
+# Inventory upload placeholder
+with st.sidebar:
+    st.subheader("Inventory Upload")
+    uploaded_file = st.file_uploader("Upload Inventory Excel", type=["xlsx"])
+    if uploaded_file:
+        try:
+            df = pd.read_excel(uploaded_file)
+            st.success(f"Inventory loaded: {df.shape[0]} rows")
+            st.session_state["inventory_loaded"] = True
+        except Exception as e:
+            st.error("Failed to read Excel file. Check format.")
