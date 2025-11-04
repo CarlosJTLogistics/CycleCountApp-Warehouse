@@ -1,15 +1,22 @@
+# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import os
 import time
 from datetime import datetime, timezone
 from typing import Dict
 
+
+# guarded components import at top-level (safe if unavailable)
+try:
+    import streamlit.components.v1 as components
+except Exception:
+    components = None
 import streamlit as st
 import pandas as pd
 import pytz
-
 # ---- App Metadata ----
-APP_NAME = "CycleCountApp V2 — Warehouse"
-APP_ICON = "📦"
+APP_NAME = "CycleCountApp V2 ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Warehouse"
+APP_ICON = "ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦"
 DEFAULT_TZ = os.getenv("CC_TZ", "America/Chicago")
 
 # Fixed assignee list (keep exactly as specified)
@@ -42,7 +49,7 @@ def guard_render(fn):
 TRANSLATIONS: Dict[str, Dict[str, str]] = {
     "en": {
         "welcome_title": "Welcome to Warehouse Cycle Count",
-        "welcome_sub": "Loading your workspace…",
+        "welcome_sub": "Loading your workspaceÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦",
         "continue": "Continue",
         "language": "Language",
         "tab_dashboard": "Live Dashboard",
@@ -94,33 +101,33 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "bulk_discrepancies": "Bulk Discrepancies (per-pallet only)",
         # Step 5 labels
         "header_title": "Warehouse Cycle Count",
-        "header_sub": "Fast • Accurate • Mobile-friendly",
+        "header_sub": "Fast ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Accurate ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Mobile-friendly",
         "complete": "Complete",
     },
     "es": {
-        "welcome_title": "Bienvenido a Conteo Cíclico (Almacén)",
-        "welcome_sub": "Cargando su espacio de trabajo…",
+        "welcome_title": "Bienvenido a Conteo CÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­clico (AlmacÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©n)",
+        "welcome_sub": "Cargando su espacio de trabajoÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦",
         "continue": "Continuar",
         "language": "Idioma",
         "tab_dashboard": "Panel en Vivo",
         "tab_assign": "Asignaciones",
         "tab_my_assign": "Mis Asignaciones",
-        "tab_settings": "Configuración",
+        "tab_settings": "ConfiguraciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n",
         "sound": "Sonido (escaneo y enviar)",
-        "vibration": "Vibración (escaneo y enviar)",
+        "vibration": "VibraciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n (escaneo y enviar)",
         "tz": "Zona horaria",
-        "diag": "Diagnóstico",
+        "diag": "DiagnÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³stico",
         "ready": "Listo",
-        "footer": "Hecho para velocidad, seguridad y claridad en el almacén.",
+        "footer": "Hecho para velocidad, seguridad y claridad en el almacÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©n.",
         # Step 3 labels
-        "assign_form_title": "Crear asignación",
+        "assign_form_title": "Crear asignaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n",
         "assignee": "Asignar a (nombre)",
         "pallet_id": "ID de Tarima",
-        "location": "Ubicación",
+        "location": "UbicaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n",
         "expected_qty": "Cantidad Esperada",
         "create": "Crear",
         "your_name": "Su nombre",
-        "select_assignment": "Seleccione una asignación",
+        "select_assignment": "Seleccione una asignaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n",
         "perform_count": "Realizar Conteo",
         "sku": "SKU",
         "lot": "LOTE (Actual)",
@@ -132,14 +139,14 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "assigned_list": "Elementos asignados",
         "lock_status": "Bloqueo",
         "no_assignments": "Sin asignaciones.",
-        "download_csv": "Descargar CSV de Envíos",
+        "download_csv": "Descargar CSV de EnvÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­os",
         "filter_by_user": "Filtrar por usuario",
         "filter_by_issue": "Filtrar por tipo de incidencia",
         # Step 4 labels
         "inv_upload_map": "Carga y Mapeo de Inventario",
         "sheet": "Hoja",
-        "header_row": "Fila de encabezado (índice 0)",
-        "map_location": "Columna de Ubicación",
+        "header_row": "Fila de encabezado (ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ndice 0)",
+        "map_location": "Columna de UbicaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n",
         "map_pallet": "Columna de ID de Tarima (opcional)",
         "map_sku": "Columna de SKU (opcional)",
         "map_lot": "Columna de LOTE (opcional)",
@@ -147,14 +154,21 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "save_mapping": "Guardar Mapeo",
         "mapping_saved": "Mapeo guardado.",
         "discrepancies": "Discrepancias",
-        "non_match": "Envíos No Coincidentes",
+        "non_match": "EnvÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­os No Coincidentes",
         "bulk_discrepancies": "Discrepancias de Bulk (por tarima)",
         # Step 5 labels
-        "header_title": "Conteo Cíclico de Almacén",
-        "header_sub": "Rápido • Preciso • Móvil",
+        "header_title": "Conteo CÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­clico de AlmacÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©n",
+        "header_sub": "RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡pido ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Preciso ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ MÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³vil",
         "complete": "Completar",
     },
 }
+
+# --- ASCII-safe overrides for splash subtitle to prevent mojibake ---
+try:
+    TRANSLATIONS["en"]["welcome_sub"] = "Loading your workspace..."
+    TRANSLATIONS["es"]["welcome_sub"] = "Cargando su espacio de trabajo..."
+except Exception:
+    pass
 
 def _init_lang() -> str:
     if "lang" not in st.session_state:
@@ -206,11 +220,10 @@ def mobile_touch_css():
       .stMarkdown div, .stAlert { border-radius: 6px; }
     </style>
     """, unsafe_allow_html=True)
-
 def _header_bar():
     st.markdown(f"""
-    <div class="warehouse-header">🏭 <b>{t('header_title')}</b></div>
-    <div class="warehouse-sub">{t('header_sub')}</div>
+    <div class="warehouse-header">ðŸ­ <b>{t('header_title')}</b></div>
+    <div class="warehouse-sub">Fast &bull; Accurate &bull; Mobile-friendly</div>
     """, unsafe_allow_html=True)
 
 @guard_render
@@ -228,26 +241,30 @@ def splash():
 def _local_timestamp_str():
     tzname = st.session_state.get("tz_name", DEFAULT_TZ)
     return local_now(tzname).strftime("%Y-%m-%d %I:%M:%S %p")
-
 def _feedback_success():
+    # JS feedback for sound/vibration (safe if blocked or components missing)
     if not (st.session_state.get("sound_on") or st.session_state.get("vibration_on")):
         return
-    import streamlit.components.v1 as components
+    if components is None:
+        return
+
     do_sound = "true" if st.session_state.get("sound_on") else "false"
     do_vibe  = "true" if st.session_state.get("vibration_on") else "false"
-    components.html(f"""
+
+    # Avoid f-strings to eliminate brace escaping risks
+    html = """
     <audio id="beep" preload="auto">
       data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABYAAAABAA==
     </audio>
     <script>
-      try {{
-        if ({do_sound}) document.getElementById('beep').play().catch(()=>{});
-        if ({do_vibe} && navigator.vibrate) navigator.vibrate([60,40,60]);
-      }} catch (e) {{}}
+      try {
+        if (__DO_SOUND__) document.getElementById('beep').play().catch(()=>{});
+        if (__DO_VIBE__ && navigator.vibrate) navigator.vibrate([60,40,60]);
+      } catch (e) {}
     </script>
-    """, height=0)
-
-# ---- Data modules ----
+    """
+    html = html.replace("__DO_SOUND__", do_sound).replace("__DO_VIBE__", do_vibe)
+    components.html(html, height=0)
 import utils.storage as storage
 import utils.assignments as A
 import utils.mapping as M
@@ -365,7 +382,7 @@ def tab_dashboard():
             st.markdown("#### " + t("non_match"))
             st.dataframe(disc, use_container_width=True, height=200)
 
-        # Bulk Discrepancies (per-pallet only) — using Actual Pallet, excluding TUN racks
+        # Bulk Discrepancies (per-pallet only) ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â using Actual Pallet, excluding TUN racks
         st.markdown("#### " + t("bulk_discrepancies"))
         if not disc.empty:
             bulk = disc[~disc["location"].fillna("").str.upper().str.startswith("TUN")]
@@ -377,7 +394,7 @@ def tab_dashboard():
                         pal = str(row.get("actual_pallet",""))
                         sku = str(row.get("sku",""))
                         lot = str(row.get("lot",""))
-                        with st.expander(f"📦 {pal} @ {loc}  —  SKU {sku}  LOT {lot}"):
+                        with st.expander(f"ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ {pal} @ {loc}  ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â  SKU {sku}  LOT {lot}"):
                             # show all lines that match this group
                             match_mask = (bulk["location"].astype(str)==loc) & (bulk["actual_pallet"].astype(str)==pal) & \
                                          (bulk["sku"].astype(str)==sku) & (bulk["lot"].astype(str)==lot)
@@ -463,7 +480,7 @@ def tab_assignments():
         _friendly_error(e)
 
     if not st.session_state.get("inventory_loaded"):
-        st.caption("ℹ Tip: Upload inventory (sidebar) and save column mapping to enable auto Expected QTY.")
+        st.caption("ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¹ Tip: Upload inventory (sidebar) and save column mapping to enable auto Expected QTY.")
 
 @guard_render
 def tab_my_assignments():
@@ -532,9 +549,9 @@ def tab_my_assignments():
 @guard_render
 def tab_settings():
     st.subheader(t("tab_settings"))
-    st.write("• Sound:", "ON" if st.session_state.get("sound_on") else "OFF")
-    st.write("• Vibration:", "ON" if st.session_state.get("vibration_on") else "OFF")
-    st.write("• Timezone:", st.session_state.get("tz_name"))
+    st.write("ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Sound:", "ON" if st.session_state.get("sound_on") else "OFF")
+    st.write("ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Vibration:", "ON" if st.session_state.get("vibration_on") else "OFF")
+    st.write("ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Timezone:", st.session_state.get("tz_name"))
     st.caption(t("footer"))
 
 def main():
@@ -552,3 +569,47 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def _fix_mojibake(s: str) -> str:
+    """
+    If text looks garbled (Ã, Â, â patterns), try to re-decode it, then
+    replace risky punctuation with ASCII/HTML-safe equivalents.
+    Always returns a safe string.
+    """
+    try:
+        if not isinstance(s, str):
+            return s
+        txt = s
+
+        # Attempt to undo common double-encoding: UTF-8 bytes decoded as latin-1
+        if ("Ã" in txt) or ("Â" in txt) or ("â" in txt):
+            try:
+                txt2 = txt.encode("latin-1", "ignore").decode("utf-8", "ignore")
+                if txt2:
+                    txt = txt2
+            except Exception:
+                pass
+
+        # Normalize punctuation to ASCII-safe equivalents
+        repl = {
+            "\u2026": "...",   # ellipsis
+            "\u2018": "'",     # left single quote
+            "\u2019": "'",     # right single quote
+            "\u201C": '"',     # left double quote
+            "\u201D": '"',     # right double quote
+            "\u2013": "-",     # en dash
+            "\u2014": "-",     # em dash
+            "\u00A0": " ",     # NBSP
+            "\u2022": "*",     # bullet (we use &bull; in HTML elsewhere)
+        }
+        for k, v in repl.items():
+            txt = txt.replace(k, v)
+        return txt
+    except Exception:
+        return s
+
+def t(key: str) -> str:
+    # Translation lookup with built-in mojibake fix
+    lang = st.session_state.get("lang", "en")
+    raw = TRANSLATIONS.get(lang, TRANSLATIONS["en"]).get(key, key)
+    return _fix_mojibake(raw)
