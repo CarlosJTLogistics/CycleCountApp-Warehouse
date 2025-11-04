@@ -91,7 +91,11 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "mapping_saved": "Mapping saved.",
         "discrepancies": "Discrepancies",
         "non_match": "Non-Match Submissions",
-        "bulk_discrepancies": "Bulk Discrepancies (per-pallet only) — preview",
+        "bulk_discrepancies": "Bulk Discrepancies (per-pallet only)",
+        # Step 5 labels
+        "header_title": "Warehouse Cycle Count",
+        "header_sub": "Fast • Accurate • Mobile-friendly",
+        "complete": "Complete",
     },
     "es": {
         "welcome_title": "Bienvenido a Conteo Cíclico (Almacén)",
@@ -144,7 +148,11 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "mapping_saved": "Mapeo guardado.",
         "discrepancies": "Discrepancias",
         "non_match": "Envíos No Coincidentes",
-        "bulk_discrepancies": "Discrepancias de Bulk (por tarima) — vista previa",
+        "bulk_discrepancies": "Discrepancias de Bulk (por tarima)",
+        # Step 5 labels
+        "header_title": "Conteo Cíclico de Almacén",
+        "header_sub": "Rápido • Preciso • Móvil",
+        "complete": "Completar",
     },
 }
 
@@ -184,9 +192,25 @@ def mobile_touch_css():
       .stButton>button { padding: 0.8rem 1.2rem; font-size: 1rem; }
       .stTextInput>div>div>input, .stNumberInput input { font-size: 1rem; }
       .stSelectbox div[data-baseweb='select'] { font-size: 1rem; }
-      .block-container { padding-top: 1.5rem; }
+      .block-container { padding-top: 1.0rem; }
       h1, h2, h3 { letter-spacing: 0.2px; }
+      /* Header bar */
+      .warehouse-header {
+        background: linear-gradient(90deg, #F57C00, #ff9c3a);
+        color: #111; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px;
+      }
+      .warehouse-sub {
+        color: #333; font-size: 0.9rem; margin-top: -6px; margin-bottom: 8px;
+      }
+      /* Card accent */
+      .stMarkdown div, .stAlert { border-radius: 6px; }
     </style>
+    """, unsafe_allow_html=True)
+
+def _header_bar():
+    st.markdown(f"""
+    <div class="warehouse-header">🏭 <b>{t('header_title')}</b></div>
+    <div class="warehouse-sub">{t('header_sub')}</div>
     """, unsafe_allow_html=True)
 
 @guard_render
@@ -206,7 +230,6 @@ def _local_timestamp_str():
     return local_now(tzname).strftime("%Y-%m-%d %I:%M:%S %p")
 
 def _feedback_success():
-    # JS feedback for sound/vibration (safe if blocked)
     if not (st.session_state.get("sound_on") or st.session_state.get("vibration_on")):
         return
     import streamlit.components.v1 as components
@@ -218,9 +241,7 @@ def _feedback_success():
     </audio>
     <script>
       try {{
-        if ({do_sound}) document.getElementById('beep').play().catch(()=>{{
-          /* ignored if blocked */
-        }});
+        if ({do_sound}) document.getElementById('beep').play().catch(()=>{});
         if ({do_vibe} && navigator.vibrate) navigator.vibrate([60,40,60]);
       }} catch (e) {{}}
     </script>
@@ -249,7 +270,6 @@ def sidebar():
                 try:
                     M.save_inventory_bytes(uploaded.getvalue())
                     st.success("Inventory file saved.")
-                    # Reset mapping dependent state
                     st.session_state["mapping"] = {}
                     st.session_state["map_sheet"] = None
                     st.session_state["map_header"] = 0
@@ -332,7 +352,7 @@ def tab_dashboard():
         if issue_f and "issue_type" in df.columns:
             df = df[df["issue_type"].isin(issue_f)]
 
-        st.dataframe(df, use_container_width=True, height=320)
+        st.dataframe(df, use_container_width=True, height=300)
 
         # Discrepancies (hide MISSING)
         st.markdown("### " + t("discrepancies"))
@@ -343,10 +363,31 @@ def tab_dashboard():
             st.caption("No discrepancies yet.")
         else:
             st.markdown("#### " + t("non_match"))
-            st.dataframe(disc, use_container_width=True, height=220)
+            st.dataframe(disc, use_container_width=True, height=200)
 
+        # Bulk Discrepancies (per-pallet only) — using Actual Pallet, excluding TUN racks
         st.markdown("#### " + t("bulk_discrepancies"))
-        st.caption("Per-pallet bulk only. (Full bulk logic will be added next; this is a placeholder view.)")
+        if not disc.empty:
+            bulk = disc[~disc["location"].fillna("").str.upper().str.startswith("TUN")]
+            if "actual_pallet" in bulk.columns:
+                try:
+                    gb = bulk.groupby(["location","actual_pallet","sku","lot"], dropna=False, as_index=False).size()
+                    for _, row in gb.iterrows():
+                        loc = str(row.get("location",""))
+                        pal = str(row.get("actual_pallet",""))
+                        sku = str(row.get("sku",""))
+                        lot = str(row.get("lot",""))
+                        with st.expander(f"📦 {pal} @ {loc}  —  SKU {sku}  LOT {lot}"):
+                            # show all lines that match this group
+                            match_mask = (bulk["location"].astype(str)==loc) & (bulk["actual_pallet"].astype(str)==pal) & \
+                                         (bulk["sku"].astype(str)==sku) & (bulk["lot"].astype(str)==lot)
+                            st.dataframe(bulk[match_mask], use_container_width=True, height=160)
+                except Exception as e:
+                    _friendly_error(e)
+            else:
+                st.caption("No 'Actual Pallet' in data yet. Submit new entries to populate.")
+        else:
+            st.caption("No bulk discrepancies yet.")
 
         # Download CSV
         try:
@@ -374,7 +415,7 @@ def tab_assignments():
             autofill = None
             try:
                 mapping = M.load_mapping()
-                if mapping and M.has_inventory() and st.session_state.get("map_sheet") is not None:
+                if mapping and M.has_inventory():
                     df_inv = M.load_inventory_df(sheet_name=mapping.get("sheet_name"), header_row=int(mapping.get("header_row",0)))
                     lookup = {
                         "pallet_col": pallet_id,
@@ -382,8 +423,8 @@ def tab_assignments():
                         "sku_col": "",
                         "lot_col": "",
                     }
-                    autofill = M.get_expected_qty(df_inv, mapping, lookup)
-                    # Only set session default if not already set by user
+                    from utils.mapping import get_expected_qty
+                    autofill = get_expected_qty(df_inv, mapping, lookup)
                     if autofill is not None and (st.session_state.get("assign_expected") in (None, 0, "")):
                         st.session_state["assign_expected"] = int(autofill)
             except Exception:
@@ -393,7 +434,6 @@ def tab_assignments():
         create = st.button(t("create"), type="primary")
 
         if create:
-            import utils.assignments as A
             try:
                 if not assignee or not pallet_id or not location:
                     st.warning("Assignee, Pallet ID, and Location are required.")
@@ -405,7 +445,6 @@ def tab_assignments():
                 _friendly_error(e)
 
     # Assigned list
-    import utils.assignments as A
     st.markdown("### " + t("assigned_list"))
     try:
         all_assigned = list(A.ASSIGNMENTS.values())
@@ -413,6 +452,7 @@ def tab_assignments():
             st.info(t("no_assignments"))
         else:
             for a in all_assigned:
+                if a.get("status") != "assigned": continue
                 cols = st.columns([2,2,2,1,1])
                 cols[0].write(f"**{a['user']}**")
                 cols[1].write(f"{t('pallet_id')}: {a['pallet_id']}")
@@ -429,18 +469,15 @@ def tab_assignments():
 def tab_my_assignments():
     st.subheader(t("tab_my_assign"))
 
-    import utils.assignments as A
-    import utils.storage as storage
-
     user = st.selectbox(t("your_name"), ASSIGN_NAME_OPTIONS, index=0, key="my_name")
-    my_list = A.get_user_assignments(user)
-    if not my_list:
+    pairs = A.get_user_assignments(user)  # list of (aid, dict)
+    if not pairs:
         st.info(t("no_assignments"))
         return
 
-    labels = [f"{a['pallet_id']} @ {a['location']}" for a in my_list]
+    labels = [f"{a['pallet_id']} @ {a['location']}" for _, a in pairs]
     idx = st.selectbox(t("select_assignment"), options=list(range(len(labels))), format_func=lambda i: labels[i], key="my_assign_idx")
-    a = my_list[idx]
+    aid, a = pairs[idx]
 
     st.markdown("### " + t("perform_count"))
     r1 = st.columns([1,1,1,1])
@@ -478,12 +515,14 @@ def tab_my_assignments():
                 "expected_qty": str(a.get("expected_qty","")),
                 "counted_qty": str(counted_qty),
                 "issue_type": issue_type,
+                "actual_pallet": actual_pallet,
                 "note": note,
             }
             storage.append_submission(row)
+            # Mark assignment completed
+            A.complete(aid)
             _feedback_success()
             st.success(t("ready"))
-            # Reset key inputs and return to list
             st.session_state["issue_type_sel"] = "Match"
             st.session_state["my_assign_idx"] = 0
             st.rerun()
@@ -503,6 +542,7 @@ def main():
     init_state()
     mobile_touch_css()
     splash()
+    _header_bar()  # visible warehouse theme header
     sidebar()
     tabs = st.tabs([t("tab_dashboard"), t("tab_assign"), t("tab_my_assign"), t("tab_settings")])
     with tabs[0]: tab_dashboard()
