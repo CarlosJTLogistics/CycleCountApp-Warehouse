@@ -311,7 +311,9 @@ def mobile_touch_css():
       /* Tiny tweak for tabs spacing with icons */
 #       .stTabs [data-baseweb="tab-list"] { gap: 6px; }
     </style>
-    ''', unsafe_allow_html=True)def _header_bar():
+    ''', unsafe_allow_html=True)
+
+def _header_bar():
     _cc_safe_global_css_once()  # replaced broken st.markdown CSS block@guard_render
 def splash():
     if not st.session_state.get("splash_done"):
@@ -675,7 +677,9 @@ def tab_settings():
             else:
                 st.warning("Branding save failed. Check file type/permissions.")
 
-    st.caption(t("footer"))def main():
+    st.caption(t("footer"))
+
+def main():
     st.set_page_config(page_title=APP_NAME, page_icon=APP_ICON, layout="wide")
     init_state()
     mobile_touch_css()
