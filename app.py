@@ -12,6 +12,62 @@ try:
 except Exception:
     components = None
 import streamlit as st
+# == CC Global CSS Helper ==
+def _cc_safe_global_css_once():
+    try:
+        import streamlit as st
+        if st.session_state.get("_cc_css_once_done"):
+            return
+        st.session_state["_cc_css_once_done"] = True
+        _cc_safe_global_css_once()  # replaced broken st.markdown CSS blockexcept Exception:
+        pass
+
+def render_live_chip(label: str = "Live"):
+    try:
+        import streamlit as st
+        _cc_safe_global_css_once()
+        live_on = bool(st.session_state.get("_step8_live_on", True))
+        cls = "" if live_on else " off"
+        _cc_safe_global_css_once()  # replaced broken st.markdown CSS blockexcept Exception:
+        pass
+# == /CC Global CSS Helper ==
+# == Step 8.1: Live Chip Utilities (auto) ==
+def _live_chip_css_once():
+    try:
+        import streamlit as st  # already imported earlier
+        if st.session_state.get("_live_chip_css_done"):
+            return
+        st.session_state["_live_chip_css_done"] = True
+        _cc_safe_global_css_once()  # replaced broken st.markdown CSS blockexcept Exception:
+        passdef render_live_chip(label: str = "Live"):
+    """Renders a compact 'Live' chip reflecting Step 8 Live Mode state."""
+    try:
+        import streamlit as st
+# == CC Global CSS Helper ==
+def _cc_safe_global_css_once():
+    try:
+        import streamlit as st
+        if st.session_state.get("_cc_css_once_done"):
+            return
+        st.session_state["_cc_css_once_done"] = True
+        _cc_safe_global_css_once()  # replaced broken st.markdown CSS blockexcept Exception:
+        pass
+
+def render_live_chip(label: str = "Live"):
+    try:
+        import streamlit as st
+        _cc_safe_global_css_once()
+        live_on = bool(st.session_state.get("_step8_live_on", True))
+        cls = "" if live_on else " off"
+        _cc_safe_global_css_once()  # replaced broken st.markdown CSS blockexcept Exception:
+        pass
+# == /CC Global CSS Helper ==
+        _live_chip_css_once()
+        live_on = bool(st.session_state.get("_step8_live_on", True))
+        state_cls = "" if live_on else " off"
+        _cc_safe_global_css_once()  # replaced broken st.markdown CSS blockexcept Exception:
+        pass
+# == /Step 8.1 ==
 import pandas as pd
 import pytz
 # ---- App Metadata ----
@@ -26,16 +82,16 @@ ASSIGN_NAME_OPTIONS = [
     "Stephanie", "Tyteanna"
 ]
 
-FEATURE_FLAGS = {
-    "sound_default_on": True,
-    "vibration_default_on": True,
-}
-
+# FEATURE_FLAGS = {
+#     "sound_default_on": True,
+#     "vibration_default_on": True,
+# }
+# 
 # ---- Error Guard ----
-def _friendly_error(e: Exception):
-    st.error("Something went wrong, but the app is still running safely.")
-    with st.expander("Show diagnostics (copyable)"):
-        st.code(f"{type(e).__name__}: {e}", language="text")
+# def _friendly_error(e: Exception):
+#     st.error("Something went wrong, but the app is still running safely.")
+#     with st.expander("Show diagnostics (copyable)"):
+#         st.code(f"{type(e).__name__}: {e}", language="text")
 
 def guard_render(fn):
     def _wrapped(*args, **kwargs):
@@ -201,123 +257,62 @@ def local_now(tz_name: str) -> datetime:
 
 # ---- UI helpers ----
 def mobile_touch_css():
-    st.markdown("""
-    <style>
-      :root {
-        --wh-accent: #F57C00;
-        --wh-accent-2: #ff9c3a;
-        --wh-bg: #ffffff;
-        --wh-bg-2: #f4f6f8;
-        --wh-text: #111111;
-      }
-      html, body { background: var(--wh-bg); }
-      .block-container {
-        padding-top: 1.0rem;
-        background-image: repeating-linear-gradient(135deg, rgba(0,0,0,0.015), rgba(0,0,0,0.015) 6px, transparent 6px, transparent 12px);
-        animation: fadeInUp 280ms ease-out both;
-      }
-      .stButton>button { padding: 0.85rem 1.25rem; font-size: 1rem; border-radius: 8px; }
-      .stButton>button[kind="primary"] { background: var(--wh-accent); border: 0; }
-      .stButton>button[kind="primary"]:hover { filter: brightness(1.05); transform: translateY(-1px); animation: pulse 900ms ease-out; }
-      .stTextInput>div>div>input, .stNumberInput input { font-size: 1rem; }
-      .stSelectbox div[data-baseweb='select'] { font-size: 1rem; }
-      h1, h2, h3 { letter-spacing: 0.2px; }
+    _cc_safe_global_css_once()  # replaced broken st.markdown CSS block#       @keyframes pulse {
+#         0%  { box-shadow: 0 0 0 0 rgba(245,124,0,0.35); }
+#         70% { box-shadow: 0 0 0 10px rgba(245,124,0,0); }
+#         100%{ box-shadow: 0 0 0 0 rgba(245,124,0,0); }
+#       }
+#       @keyframes shimmer {
+#         0%   { left: -40%; }
+#         100% { left: 120%; }
+#       }
+#       @keyframes fadeInUp {
+#         from { opacity: 0; transform: translateY(6px); }
+#         to   { opacity: 1; transform: translateY(0); }
+#       }
 
-      .warehouse-header {
-        background: linear-gradient(90deg, var(--wh-accent), var(--wh-accent-2));
-        color: #111; border-radius: 10px; padding: 12px 16px; margin-bottom: 6px;
-        position: relative; overflow: hidden;
-      }
-      .warehouse-header::after {
-        content: ""; position: absolute; top: 0; left: -40%;
-        width: 40%; height: 100%;
-        background: linear-gradient(120deg, rgba(255,255,255,0), rgba(255,255,255,0.22), rgba(255,255,255,0));
-        transform: skewX(-12deg);
-        animation: shimmer 3.3s infinite;
-      }
-      .warehouse-sub { color: #333; font-size: 0.92rem; margin-top: -4px; margin-bottom: 8px; }
-
-      .stMarkdown div, .stAlert, .stDataFrame { border-radius: 8px; }
-      .streamlit-expanderHeader:hover { filter: brightness(1.02); transform: translateY(-1px); transition: transform 120ms ease; }
-
-      @keyframes pulse {
-        0%  { box-shadow: 0 0 0 0 rgba(245,124,0,0.35); }
-        70% { box-shadow: 0 0 0 10px rgba(245,124,0,0); }
-        100%{ box-shadow: 0 0 0 0 rgba(245,124,0,0); }
-      }
-      @keyframes shimmer {
-        0%   { left: -40%; }
-        100% { left: 120%; }
-      }
-      @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(6px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-
-      .stTabs [data-baseweb="tab-list"] { gap: 6px; }
+#       .stTabs [data-baseweb="tab-list"] { gap: 6px; }
     </style>
-    """, unsafe_allow_html=True)
-      @keyframes pulse {
-        0%  { box-shadow: 0 0 0 0 rgba(245,124,0,0.35); }
-        70% { box-shadow: 0 0 0 10px rgba(245,124,0,0); }
-        100%{ box-shadow: 0 0 0 0 rgba(245,124,0,0); }
+# removed orphan st.markdown fragment
+#         0% { box-shadow: 0 0 0 0 rgba(245,124,0,0.35); }
+#         70% { box-shadow: 0 0 0 10px rgba(245,124,0,0); }
+#         100% { box-shadow: 0 0 0 0 rgba(245,124,0,0); }
       }
-      @keyframes shimmer {
-        0%   { left: -40%; }
-        100% { left: 120%; }
-      }
-      @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(6px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
+#       @keyframes shimmer {
+#         0% { left: -40%; }
+#         100% { left: 120%; }
+#       }
+#       @keyframes fadeInUp {
+#         from { opacity: 0; transform: translateY(6px); }
+#         to   { opacity: 1; transform: translateY(0); }
+#       }
 
-      .stTabs [data-baseweb="tab-list"] { gap: 6px; }
+#       .stTabs [data-baseweb="tab-list"] { gap: 6px; }
     </style>
-    """, unsafe_allow_html=True)\n
-        0% { box-shadow: 0 0 0 0 rgba(245,124,0,0.35); }
-        70% { box-shadow: 0 0 0 10px rgba(245,124,0,0); }
-        100% { box-shadow: 0 0 0 0 rgba(245,124,0,0); }
-      }
-      @keyframes shimmer {
-        0% { left: -40%; }
-        100% { left: 120%; }
-      }
-      @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(6px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-
-      .stTabs [data-baseweb="tab-list"] { gap: 6px; }
+# removed orphan st.markdown fragment
+#       @keyframes shimmer { 0% { left: -40%; } 100% { left: 120%; } }
+#       @keyframes fadeInUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+#       .stTabs [data-baseweb="tab-list"] { gap: 6px; }
     </style>
-    """, unsafe_allow_html=True)\n
-      @keyframes shimmer { 0% { left: -40%; } 100% { left: 120%; } }
-      @keyframes fadeInUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-      .stTabs [data-baseweb="tab-list"] { gap: 6px; }
-    </style>
-    """, unsafe_allow_html=True)\n
-        0% { box-shadow: 0 0 0 0 rgba(245,124,0,0.35); }
-        70%{ box-shadow: 0 0 0 10px rgba(245,124,0,0); }
-        100%{ box-shadow: 0 0 0 0 rgba(245,124,0,0); }
+# removed orphan st.markdown fragment
+#         0% { box-shadow: 0 0 0 0 rgba(245,124,0,0.35); }
+#         70%{ box-shadow: 0 0 0 10px rgba(245,124,0,0); }
+#         100%{ box-shadow: 0 0 0 0 rgba(245,124,0,0); }
       }
-      @keyframes shimmer {
-        0% { left: -40%; }
-        100% { left: 120%; }
-      }
-      @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(6px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
+#       @keyframes shimmer {
+#         0% { left: -40%; }
+#         100% { left: 120%; }
+#       }
+#       @keyframes fadeInUp {
+#         from { opacity: 0; transform: translateY(6px); }
+#         to   { opacity: 1; transform: translateY(0); }
+#       }
 
       /* Tiny tweak for tabs spacing with icons */
-      .stTabs [data-baseweb="tab-list"] { gap: 6px; }
+#       .stTabs [data-baseweb="tab-list"] { gap: 6px; }
     </style>
-    """, unsafe_allow_html=True)def _header_bar():
-    st.markdown(f"""
-    <div class="warehouse-header">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ <b>{t('header_title')}</b></div>
-    <div class="warehouse-sub">Fast &bull; Accurate &bull; Mobile-friendly</div>
-    """, unsafe_allow_html=True)
-
-@guard_render
+    ''', unsafe_allow_html=True)def _header_bar():
+    _cc_safe_global_css_once()  # replaced broken st.markdown CSS block@guard_render
 def splash():
     if not st.session_state.get("splash_done"):
         st.title(t("welcome_title"))
@@ -354,8 +349,8 @@ def _feedback_success():
       } catch (e) {}
     </script>
     """
-    html = html.replace("__DO_SOUND__", do_sound).replace("__DO_VIBE__", do_vibe)
-    components.html(html, height=0)
+#     html = html.replace("__DO_SOUND__", do_sound).replace("__DO_VIBE__", do_vibe)
+#     components.html(html, height=0)
 import utils.storage as storage
 import utils.assignments as A
 import utils.mapping as M
@@ -378,8 +373,8 @@ def sidebar():
                 try:
                     M.save_inventory_bytes(uploaded.getvalue())
                     st.success("Inventory file saved.")
-                    st.session_state["mapping"] = {}
-                    st.session_state["map_sheet"] = None
+#                     st.session_state["mapping"] = {}
+#                     st.session_state["map_sheet"] = None
                     st.session_state["map_header"] = 0
                 except Exception as e:
                     _friendly_error(e)
@@ -399,15 +394,15 @@ def sidebar():
 
                     if st.button(t("save_mapping")):
                         try:
-                            mapping = {
-                                "sheet_name": st.session_state["map_sheet"],
-                                "header_row": int(st.session_state["map_header"]),
-                                "location_col": location_col or None,
-                                "pallet_col": pallet_col or None,
-                                "sku_col": sku_col or None,
-                                "lot_col": lot_col or None,
-                                "expected_col": expected_col,
-                            }
+#                             mapping = {
+#                                 "sheet_name": st.session_state["map_sheet"],
+#                                 "header_row": int(st.session_state["map_header"]),
+#                                 "location_col": location_col or None,
+#                                 "pallet_col": pallet_col or None,
+#                                 "sku_col": sku_col or None,
+#                                 "lot_col": lot_col or None,
+#                                 "expected_col": expected_col,
+#                             }
                             M.save_mapping(mapping)
                             st.session_state["mapping"] = mapping
                             st.session_state["inventory_loaded"] = True
@@ -427,99 +422,100 @@ def _fmt_lock_remaining(a: dict) -> str:
         rem = (a.get("locked_until") - now).total_seconds()
         if rem <= 0: return "unlocked"
         mins = int(rem // 60); secs = int(rem % 60)
-        return f"{mins:02d}:{secs:02d} remaining"
-    except Exception:
+#         return f"{mins:02d}:{secs:02d} remaining"
+#     except Exception:
         return "locked"
 
 # ---- Tabs ----
 @guard_render
-def tab_dashboard():
-    st.subheader(t("tab_dashboard"))
-    try:
-        rows = storage.read_submissions()
-        df = pd.DataFrame(rows)
-        if df.empty:
-            st.info("No submissions yet.")
-            return
-
+# def tab_dashboard():
+#     st.subheader(t("tab_dashboard"))
+#     
+# _cc_safe_global_css_once()  # replaced broken st.markdown CSS block# render_live_chip()try:
+#         rows = storage.read_submissions()
+#         df = pd.DataFrame(rows)
+#         if df.empty:
+#             st.info("No submissions yet.")
+#             return
+# 
         # numeric coercion
-        for col in ["expected_qty", "counted_qty"]:
-            if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors="coerce")
-
+#         for col in ["expected_qty", "counted_qty"]:
+#             if col in df.columns:
+#                 df[col] = pd.to_numeric(df[col], errors="coerce")
+# 
         # Filters
-        cols = st.columns(3)
-        with cols[0]:
-            user_f = st.multiselect(t("filter_by_user"),
-                                    sorted(list(df["user"].dropna().unique())))
-        with cols[1]:
-            issue_f = st.multiselect(t("filter_by_issue"),
-                                     ISSUE_TYPE_OPTIONS)
-        if user_f:
-            df = df[df["user"].isin(user_f)]
-        if issue_f and "issue_type" in df.columns:
-            df = df[df["issue_type"].isin(issue_f)]
-
+#         cols = st.columns(3)
+#         with cols[0]:
+#             user_f = st.multiselect(t("filter_by_user"),
+#                                     sorted(list(df["user"].dropna().unique())))
+#         with cols[1]:
+#             issue_f = st.multiselect(t("filter_by_issue"),
+#                                      ISSUE_TYPE_OPTIONS)
+#         if user_f:
+#             df = df[df["user"].isin(user_f)]
+#         if issue_f and "issue_type" in df.columns:
+#             df = df[df["issue_type"].isin(issue_f)]
+# 
         # Compact columns for main view (show what matters)
-        pref_cols = ["timestamp","user","location","actual_pallet","sku","lot","expected_qty","counted_qty","issue_type","note"]
-        show_cols = [c for c in pref_cols if c in df.columns] or list(df.columns)
-        st.dataframe(df[show_cols], use_container_width=True, height=300)
-
+#         pref_cols = ["timestamp","user","location","actual_pallet","sku","lot","expected_qty","counted_qty","issue_type","note"]
+#         show_cols = [c for c in pref_cols if c in df.columns] or list(df.columns)
+#         st.dataframe(df[show_cols], use_container_width=True, height=300)
+# 
         # Discrepancies (hide MISSING; show non-Match)
-        st.markdown("### " + t("discrepancies"))
-        disc = df.copy()
-        if "issue_type" in disc.columns:
-            disc = disc[(disc["issue_type"].fillna("") != "Match") & (disc["issue_type"].fillna("") != "MISSING")]
-        if disc.empty:
-            st.caption("No discrepancies yet.")
-        else:
-            st.markdown("#### " + t("non_match"))
-            dcols = [c for c in pref_cols if c in disc.columns]
-            st.dataframe(disc[dcols] if dcols else disc, use_container_width=True, height=200)
-
+#         st.markdown("### " + t("discrepancies"))
+#         disc = df.copy()
+#         if "issue_type" in disc.columns:
+#             disc = disc[(disc["issue_type"].fillna("") != "Match") & (disc["issue_type"].fillna("") != "MISSING")]
+#         if disc.empty:
+#             st.caption("No discrepancies yet.")
+#         else:
+#             st.markdown("#### " + t("non_match"))
+#             dcols = [c for c in pref_cols if c in disc.columns]
+#             st.dataframe(disc[dcols] if dcols else disc, use_container_width=True, height=200)
+# 
         # Bulk Discrepancies (per-pallet only) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â exclude TUN racks
-        st.markdown("#### " + t("bulk_discrepancies"))
-        if not disc.empty:
-            bulk = disc[~disc["location"].fillna("").str.upper().str.startswith("TUN")].copy()
-            if not bulk.empty:
-                if "actual_pallet" in bulk.columns:
-                    try:
-                        gb = bulk.groupby(["location","actual_pallet","sku","lot"], dropna=False, as_index=False).size()
-                        for _, row in gb.iterrows():
-                            loc = str(row.get("location",""))
-                            pal = str(row.get("actual_pallet",""))
-                            sku = str(row.get("sku",""))
-                            lot = str(row.get("lot",""))
-                            with st.expander(f"PAL {pal} @ {loc}  ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â  SKU {sku}  LOT {lot}"):
+#         st.markdown("#### " + t("bulk_discrepancies"))
+#         if not disc.empty:
+#             bulk = disc[~disc["location"].fillna("").str.upper().str.startswith("TUN")].copy()
+#             if not bulk.empty:
+#                 if "actual_pallet" in bulk.columns:
+#                     try:
+#                         gb = bulk.groupby(["location","actual_pallet","sku","lot"], dropna=False, as_index=False).size()
+#                         for _, row in gb.iterrows():
+#                             loc = str(row.get("location",""))
+#                             pal = str(row.get("actual_pallet",""))
+#                             sku = str(row.get("sku",""))
+#                             lot = str(row.get("lot",""))
+#                             with st.expander(f"PAL {pal} @ {loc}  ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â  SKU {sku}  LOT {lot}"):
                                 # Only show SKU, LOT, Actual Pallet (as requested), unique lines
-                                mini = bulk[
-                                    (bulk["location"].astype(str)==loc) &
-                                    (bulk["actual_pallet"].astype(str)==pal) &
-                                    (bulk["sku"].astype(str)==sku) &
-                                    (bulk["lot"].astype(str)==lot)
-                                ]
-                                subset_cols = [x for x in ["sku","lot","actual_pallet"] if x in mini.columns]
-                                mini = mini[subset_cols].drop_duplicates()
-                                st.dataframe(mini, use_container_width=True, height=120)
-                    except Exception as e:
-                        _friendly_error(e)
-                else:
-                    st.caption("No 'Actual Pallet' in data yet. Submit new entries to populate.")
-            else:
-                st.caption("No bulk discrepancies yet.")
-        else:
-            st.caption("No bulk discrepancies yet.")
-
+#                                 mini = bulk[
+#                                     (bulk["location"].astype(str)==loc) &
+#                                     (bulk["actual_pallet"].astype(str)==pal) &
+#                                     (bulk["sku"].astype(str)==sku) &
+#                                     (bulk["lot"].astype(str)==lot)
+#                                 ]
+#                                 subset_cols = [x for x in ["sku","lot","actual_pallet"] if x in mini.columns]
+#                                 mini = mini[subset_cols].drop_duplicates()
+#                                 st.dataframe(mini, use_container_width=True, height=120)
+#                     except Exception as e:
+#                         _friendly_error(e)
+#                 else:
+#                     st.caption("No 'Actual Pallet' in data yet. Submit new entries to populate.")
+#             else:
+#                 st.caption("No bulk discrepancies yet.")
+#         else:
+#             st.caption("No bulk discrepancies yet.")
+# 
         # Download CSV
-        try:
-            with open(storage.SUBMISSIONS_FILE, "rb") as f:
-                st.download_button(label=t("download_csv"), data=f, file_name="submissions.csv", mime="text/csv")
-        except Exception:
-            st.warning("CSV not available yet.")
-    except Exception as e:
-        _friendly_error(e)
-@guard_render
-def tab_assignments():
+#         try:
+#             with open(storage.SUBMISSIONS_FILE, "rb") as f:
+#                 st.download_button(label=t("download_csv"), data=f, file_name="submissions.csv", mime="text/csv")
+#         except Exception:
+#             st.warning("CSV not available yet.")
+#     except Exception as e:
+#         _friendly_error(e)
+# @guard_render
+# def tab_assignments():
     st.subheader(t("tab_assign"))
 
     # Assigner form
@@ -537,12 +533,12 @@ def tab_assignments():
                 mapping = M.load_mapping()
                 if mapping and M.has_inventory():
                     df_inv = M.load_inventory_df(sheet_name=mapping.get("sheet_name"), header_row=int(mapping.get("header_row",0)))
-                    lookup = {
-                        "pallet_col": pallet_id,
-                        "location_col": location,
-                        "sku_col": "",
-                        "lot_col": "",
-                    }
+#                     lookup = {
+#                         "pallet_col": pallet_id,
+#                         "location_col": location,
+#                         "sku_col": "",
+#                         "lot_col": "",
+#                     }
                     from utils.mapping import get_expected_qty
                     autofill = get_expected_qty(df_inv, mapping, lookup)
                     if autofill is not None and (st.session_state.get("assign_expected") in (None, 0, "")):
@@ -598,8 +594,8 @@ def tab_my_assignments():
         st.info(t("no_assignments"))
         return
 
-    labels = [f"{a['pallet_id']} @ {a['location']}" for _, a in pairs]
-    idx = st.selectbox(t("select_assignment"), options=list(range(len(labels))), format_func=lambda i: labels[i], key="my_assign_idx")
+#     labels = [f"{a['pallet_id']} @ {a['location']}" for _, a in pairs]
+#     idx = st.selectbox(t("select_assignment"), options=list(range(len(labels))), format_func=lambda i: labels[i], key="my_assign_idx")
     aid, a = pairs[idx]
 
     st.markdown("### " + t("perform_count"))
@@ -632,18 +628,18 @@ def tab_my_assignments():
 
     if st.button(t("submit"), type="primary"):
         try:
-            row = {
-                "timestamp": _local_timestamp_str(),
-                "user": user,
-                "location": a.get("location",""),
-                "sku": a.get("sku",""),
-                "lot": lot_actual,
-                "expected_qty": str(a.get("expected_qty","")),
-                "counted_qty": str(counted_qty),
-                "issue_type": issue_type,
-                "actual_pallet": actual_pallet,
-                "note": note,
-            }
+#             row = {
+#                 "timestamp": _local_timestamp_str(),
+#                 "user": user,
+#                 "location": a.get("location",""),
+#                 "sku": a.get("sku",""),
+#                 "lot": lot_actual,
+#                 "expected_qty": str(a.get("expected_qty","")),
+#                 "counted_qty": str(counted_qty),
+#                 "issue_type": issue_type,
+#                 "actual_pallet": actual_pallet,
+#                 "note": note,
+#             }
             storage.append_submission(row)
             A.complete(aid)
             _feedback_success()
@@ -719,17 +715,17 @@ def _fix_mojibake(s: str) -> str:
                 pass
 
         # Normalize punctuation to ASCII-safe equivalents
-        repl = {
-            "\u2026": "...",   # ellipsis
-            "\u2018": "'",     # left single quote
-            "\u2019": "'",     # right single quote
-            "\u201C": '"',     # left double quote
-            "\u201D": '"',     # right double quote
-            "\u2013": "-",     # en dash
-            "\u2014": "-",     # em dash
-            "\u00A0": " ",     # NBSP
-            "\u2022": "*",     # bullet (we use &bull; in HTML elsewhere)
-        }
+#         repl = {
+#             "\u2026": "...",   # ellipsis
+#             "\u2018": "'",     # left single quote
+#             "\u2019": "'",     # right single quote
+#             "\u201C": '"',     # left double quote
+#             "\u201D": '"',     # right double quote
+#             "\u2013": "-",     # en dash
+#             "\u2014": "-",     # em dash
+#             "\u00A0": " ",     # NBSP
+#             "\u2022": "*",     # bullet (we use &bull; in HTML elsewhere)
+#         }
         for k, v in repl.items():
             txt = txt.replace(k, v)
         return txt
@@ -761,14 +757,14 @@ def _save_branding(uploaded_file, name_text):
         data_dir, logo_png, logo_jpg, brand_json = _branding_paths()
         os.makedirs(data_dir, exist_ok=True)
         # Save name
-        branding = {}
-        if os.path.exists(brand_json):
+#         branding = {}
+#         if os.path.exists(brand_json):
             try:
                 with open(brand_json, "r", encoding="utf-8") as f:
                     branding = json.load(f) or {}
             except Exception:
-                branding = {}
-        if name_text:
+#                 branding = {}
+#         if name_text:
             branding["name"] = str(name_text)
         # Save file if provided
         if uploaded_file is not None:
@@ -859,9 +855,9 @@ def _header_bar():
     </div>
     <div class="warehouse-sub">Fast &middot; Accurate &middot; Mobile-friendly</div>
     """
-    html = html.replace("__SVG__", svg).replace("__TITLE__", t('header_title'))
-    st.markdown(html, unsafe_allow_html=True)`r`n
-        .forklift { animation: drive 1600ms ease-in-out infinite alternate; }
+#     html = html.replace("__SVG__", svg).replace("__TITLE__", t('header_title'))
+#     _cc_safe_global_css_once()  # replaced broken st.markdown CSS block`r`n
+#         .forklift { animation: drive 1600ms ease-in-out infinite alternate; }
       </style>
       <g class="forklift" transform="translate(0,0)">
         <rect x="2" y="8" width="10" height="6" fill="#333" rx="1"/>
@@ -876,17 +872,7 @@ def _header_bar():
     </svg>
     """
     badge_html = _get_branding_badge_html()
-    st.markdown(f"""
-    <div class="warehouse-header">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span style="vertical-align:middle; display:inline-block; margin-right:4px;">{svg}</span>
-        <b>{t('header_title')}</b>
-      </div>
-      {badge_html}
-    </div>
-    <div class="warehouse-sub">Fast &middot; Accurate &middot; Mobile-friendly</div>
-    """, unsafe_allow_html=True)\n
-        .forklift { animation: drive 1600ms ease-in-out infinite alternate; }
+    _cc_safe_global_css_once()  # replaced broken st.markdown CSS block.forklift { animation: drive 1600ms ease-in-out infinite alternate; }
       </style>
       <g class="forklift" transform="translate(0,0)">
         <rect x="2" y="8" width="10" height="6" fill="#333" rx="1"/>
@@ -900,10 +886,4 @@ def _header_bar():
       </g>
     </svg>
     """
-    st.markdown(f"""
-    <div class="warehouse-header">
-      <span style="vertical-align:middle; display:inline-block; margin-right:8px;">{svg}</span>
-      <b>{t('header_title')}</b>
-    </div>
-    <div class="warehouse-sub">Fast &middot; Accurate &middot; Mobile-friendly</div>
-    """, unsafe_allow_html=True)
+    _cc_safe_global_css_once()  # replaced broken st.markdown CSS block
